@@ -1,39 +1,64 @@
 import numpy as np
-import pandas as pd
+class Line:
+    def __init__(self, x0, y0, x1, y1):
+        self.x0 = x0
+        self.y0 = y0
+        self.x1 = x1
+        self.y1 = y1
+    def set_slope(self):
+        """
+        Set the slope of the line.
+        """
+        if (self.x1 - self.x0) == 0:
+            self.slope= np.inf  # Handle vertical line case
+        self.slope = (self.y1 - self.y0) / (self.x1 - self.x0)
+    def get_slope(self):
 
-def calculate_average_distance(file_path):
-    # Specify the correct column names
-    column_names = ['Δx [pm]', 'Δy [pm]', 'φ [deg]', 'R [pm]', 'Δz [pA]']
+        return self.slope
+    def set_points(self,N=1000):
+        """
+        Generate N points along the line between (x0, y0) and (x1, y1).
+
+        Returns:
+        np.array -- An array of shape (N, 2) with N points along the line
+        """
+        x_points = np.linspace(self.x0, self.x1, N)
+        y_points = np.linspace(self.y0, self.y1, N)
+        points = np.column_stack((x_points, y_points))
+        self.points = points
+    def get_points(self):
+        return self.points
+# Function to read data from a text file
+def read_data_from_file(filename):
+    # Read the file and skip the header line
+    data = np.loadtxt(filename, skiprows=1)
+    return data
+
+
+# Function to calculate midpoint of a line
+def calculate_midpoint(x0, y0, x1, y1):
+    return [(x0 + x1) / 2, (y0 + y1) / 2]
+
+# Function to calculate Euclidean distance between two points
+def calculate_distance(p1, p2):
+    return np.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+
+# Main function to compute average distance and error
+def calculate_average_distance_with_error(filename):
+    N = 1000  # Number of points to generate on each line
+    # Read data from file
+    data = read_data_from_file(filename)
+    print(data[0][1])
+    # List to store distances between consecutive lines
+    lines = []
     
-    # Read the data, skipping over any unwanted columns
-    data = pd.read_csv(file_path, delim_whitespace=True, header=None, names=column_names, usecols=[0, 2, 4, 6, 8])
-
-    # Convert Δx and Δy to numeric values, forcing errors to NaN
-    data['Δx [pm]'] = pd.to_numeric(data['Δx [pm]'], errors='coerce')
-    data['Δy [pm]'] = pd.to_numeric(data['Δy [pm]'], errors='coerce')
-
-    # Drop rows where Δx or Δy contains NaN values (i.e., non-numeric data)
-    data = data.dropna(subset=['Δx [pm]', 'Δy [pm]'])
-
-    # Extract Δx and Δy columns as numeric arrays
-    delta_x = data['Δx [pm]'].values
-    delta_y = data['Δy [pm]'].values
-
-    # Check if there are at least two points to calculate differences
-    if len(delta_x) < 2 or len(delta_y) < 2:
-        raise ValueError("Not enough valid data points to calculate distances")
-
-    # Calculate distances between consecutive lines using Euclidean distance
-    distances = np.sqrt(np.diff(delta_x)**2 + np.diff(delta_y)**2)
-
-    # Calculate the average distance and the error (standard error of the mean)
-    avg_distance = np.mean(distances)
-    std_error = np.std(distances, ddof=1) / np.sqrt(len(distances))
-
-    return avg_distance, std_error
-
-# Provide the full path to slopes.txt
-file_path = 'slopes.txt'  # Replace with the correct file path
-avg_distance, std_error = calculate_average_distance(file_path)
-print(f"Average Distance: {avg_distance/1000:.4f} nm")
-print(f"Error (Standard Error): {std_error/1000:.4f} nm")
+    # Generate points on each line
+    for j in range(len(data)):
+        newLine = Line(data[j][0],data[j][1],data[j][2],data[j][3])
+        newLine.set_slope()
+        newLine.set_points(N)
+        lines.append(newLine)
+        
+# Example usage
+filename = 'slopes3.txt'  # Replace this with the path to your data file
+calculate_average_distance_with_error(filename)
