@@ -48,6 +48,7 @@ def calculate_average_distance_with_error(filename):
     N = 1000  # Number of points to generate on each line
     # Read data from file
     data = read_data_from_file(filename)
+    print('Here')
     print(data[0][1])
     # List to store distances between consecutive lines
     lines = []
@@ -60,5 +61,5 @@ def calculate_average_distance_with_error(filename):
         lines.append(newLine)
         
 # Example usage
-filename = 'slopes3.txt'  # Replace this with the path to your data file
+filename = 'RawData\slopes3.txt'  # Replace this with the path to your data file
 calculate_average_distance_with_error(filename)
