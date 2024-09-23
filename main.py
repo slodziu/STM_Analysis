@@ -59,7 +59,25 @@ def calculate_average_distance_with_error(filename):
         newLine.set_slope()
         newLine.set_points(N)
         lines.append(newLine)
-        
+    interline_distances = []
+    interline_distances_err = []
+    for i in range(len(lines)-1):
+        distances = []
+        curr_slope = lines[i].get_slope()
+        perp_slope = -1/curr_slope
+        adjacent_line_slope = lines[i+1].get_slope()
+        adjacent_line_y_intercept = lines[i+1].y0 - adjacent_line_slope*lines[i+1].x0
+        for point in lines[i].get_points():
+            perp_y_intercept = point[1] - perp_slope*point[0]
+            x_meeting = (perp_y_intercept - adjacent_line_y_intercept)/(adjacent_line_slope - perp_slope)
+            y_meeting = perp_slope*x_meeting + perp_y_intercept
+            new_distance = calculate_distance(point,[x_meeting,y_meeting])
+            distances.append(new_distance)
+        print('Average distance between line',i+1,'and line',i+2,':',np.mean(distances))
+        interline_distances.append(np.mean(distances))
+        interline_distances_err.append(np.std(distances)/np.sqrt(N))
+    print(interline_distances)
+    print(interline_distances_err)
 # Example usage
 filename = 'RawData\slopes3.txt'  # Replace this with the path to your data file
 calculate_average_distance_with_error(filename)
