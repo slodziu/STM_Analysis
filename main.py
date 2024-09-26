@@ -149,5 +149,7 @@ def calculate_average_distance_with_error(filename):
     print(f'Average interline distance: {average_interline_distance / 1e-9} nm')
     print(f'Error in average interline distance: {average_interline_distance_err / 1e-9} nm')
 
-filename = 'RawData\slopes3.txt'  
-calculate_average_distance_with_error(filename)
+filename = 'RawData\slopes3.txt'
+second_filename = 'RawData\slopes4.txt'
+#calculate_average_distance_with_error(filename)
+calculate_average_distance_with_error(second_filename)
