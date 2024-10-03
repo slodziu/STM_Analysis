@@ -45,9 +45,11 @@ errors = np.sqrt(np.diag(cov_matrix))
 # Print the coefficients and their errors
 for i, (coef, err) in enumerate(zip(coefficients, errors)):
     print(f"Coefficient a{i}: {coef} ± {err}")
+    # Print the cubic equation
 
-# Plot the cubic fit on top of the average I values data
-
+equation = f"f(V) = {coefficients[0]:.3e}V^3 + {coefficients[1]:.3e}V^2 + {coefficients[2]:.3e}V + {coefficients[3]:.3e}"
+print("Cubic equation of the fit:")
+print(equation)
 
 # Create a new figure
 plt.figure(figsize=(10, 5))
