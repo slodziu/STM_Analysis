@@ -36,8 +36,15 @@ average_I_values = np.mean(all_I_values, axis=0)
 # Use the first V_values as the common V axis (assuming all V_values are the same)
 V_values = all_V_values[0]
 # Fit V values and average I values to a cubic polynomial
-coefficients = np.polyfit(V_values, average_I_values, 3)
+coefficients, cov_matrix = np.polyfit(V_values, average_I_values, 3, cov=True)
 cubic_fit = np.polyval(coefficients, V_values)
+
+# Calculate the standard deviation errors on the coefficients
+errors = np.sqrt(np.diag(cov_matrix))
+
+# Print the coefficients and their errors
+for i, (coef, err) in enumerate(zip(coefficients, errors)):
+    print(f"Coefficient a{i}: {coef} ± {err}")
 
 # Plot the cubic fit on top of the average I values data
 
@@ -76,4 +83,5 @@ plt.ylabel('(dI/dV)/(I/V)')
 plt.title('(dI/dV)/(I/V) vs V')
 
 plt.tight_layout()
+plt.savefig('Produced_Plots/IV_Spectra.png', dpi=300)
 plt.show()
