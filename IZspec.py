@@ -26,11 +26,14 @@ Z_values = np.array(Z_values)
 I_values = np.array(I_values)
 print(len(Z_values))
 # Define the exponential model function
-def exponential_model(Z, a, b, c):
-    return a * np.exp(b * Z) + c
+def exponential_model(Z, a, b):
+    return a * np.exp(b * Z)
 
 # Fit the exponential model to the data with more lenient bounds
-params, covariance = curve_fit(exponential_model, Z_values, I_values, bounds=(-np.inf, np.inf))
+# Define an initial guess for the parameters [a, b, c]
+
+# Fit the exponential model to the data with more lenient bounds and initial guess
+params, covariance = curve_fit(exponential_model, Z_values, I_values)
 
 # Generate fitted I values using the model
 I_fitted = exponential_model(Z_values, *params)

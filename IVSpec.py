@@ -9,10 +9,11 @@ directory = 'RawData/IV_Spectra'
 # Initialize lists to accumulate V and I values
 all_V_values = []
 all_I_values = []
-
+file_count = 0
 # Loop through all files in the directory
 for filename in os.listdir(directory):
     if filename.endswith('.csv'):
+        file_count += 1
         filepath = os.path.join(directory, filename)
         # Read the CSV file without headers
         data = pd.read_csv(filepath, header=None, delimiter=';')
@@ -34,25 +35,42 @@ average_I_values = np.mean(all_I_values, axis=0)
 
 # Use the first V_values as the common V axis (assuming all V_values are the same)
 V_values = all_V_values[0]
+# Fit V values and average I values to a cubic polynomial
+coefficients = np.polyfit(V_values, average_I_values, 3)
+cubic_fit = np.polyval(coefficients, V_values)
+
+# Plot the cubic fit on top of the average I values data
+
 
 # Create a new figure
 plt.figure(figsize=(10, 5))
 
 # Plot average I vs V
 plt.subplot(1, 2, 1)
-plt.plot(V_values, average_I_values, 'bo')  # 'bo' for blue points only
+plt.plot(V_values, average_I_values, 'bo', label=f'Averaged data from {file_count} spectra')  # 'bo' for blue points only
+plt.plot(V_values, cubic_fit, 'r-', label='Cubic Fit of the Data')  # 'r-' for red line
+plt.legend()
+plt.grid(True)
 plt.xlabel('Voltage (V)')
-plt.ylabel('Current (I)')
+plt.ylabel('Current (A)')
 plt.title('Average I vs V')
 
-# Calculate dI/dV and (I/V)
-dI_dV = np.gradient(average_I_values, V_values)
-I_over_V = average_I_values / V_values
-dIdV_over_IoverV = dI_dV / I_over_V
+# Calculate the derivative of the cubic fit
+d_cubic_fit = np.polyder(coefficients)
 
+# Evaluate the derivative at the V values
+dIdV = np.polyval(d_cubic_fit, V_values)
+
+# Calculate I/V
+I_over_V = average_I_values / V_values
+
+# Calculate (dI/dV)/(I/V)
+dIdV_over_IoverV = dIdV / I_over_V
 # Plot (dI/dV)/(I/V) vs V
 plt.subplot(1, 2, 2)
-plt.plot(V_values, dIdV_over_IoverV, 'ro')  # 'ro' for red points only
+plt.plot(V_values, dIdV_over_IoverV, 'ro', label='Derivative of fitted curve')  # 'ro' for red points only
+plt.grid(True)
+plt.legend()
 plt.xlabel('Voltage (V)')
 plt.ylabel('(dI/dV)/(I/V)')
 plt.title('(dI/dV)/(I/V) vs V')
