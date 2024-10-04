@@ -1,4 +1,5 @@
 import numpy as np
+import os
 class Line:
     def __init__(self, x0, y0, x1, y1):
         """
@@ -148,8 +149,50 @@ def calculate_average_distance_with_error(filename):
 
     print(f'Average interline distance: {average_interline_distance / 1e-9} nm')
     print(f'Error in average interline distance: {average_interline_distance_err / 1e-9} nm')
+def process_lines_in_folder(folder_path):
+        """
+        Process all line data files in a specified folder and create Line objects.
+
+        Args:
+            folder_path (str): The path to the folder containing line data files.
+
+        Returns:
+            list: A list of Line objects created from the files in the folder.
+        """
+        line_objects = []
+
+        for filename in os.listdir(folder_path):
+            line_pair = []
+            if filename.endswith(".txt"):
+                file_path = os.path.join(folder_path, filename)
+                data = read_data_from_file(file_path)
+                for j in range(len(data)):
+                    new_line = Line(data[j][0], data[j][1], data[j][2], data[j][3])
+                    new_line.set_slope()
+                    new_line.set_points()
+                    line_pair.append(new_line) 
+                line_objects.append(line_pair)
+
+        return line_objects
+
+    # Example usage
+folder_path = 'RawData/PerpLines'
+lines = process_lines_in_folder(folder_path)
+for line_pair in lines:
+    # Calculate the angle between the two lines
+    slope1 = line_pair[0].get_slope()
+    slope2 = line_pair[1].get_slope()
+    angle = np.arctan(abs((slope2 - slope1) / (1 + slope1 * slope2))) * (180 / np.pi)
+    print(f'Angle between lines: {angle} degrees')
+
+    # Calculate the lengths of the lines
+    length1 = calculate_distance((line_pair[0].x0, line_pair[0].y0), (line_pair[0].x1, line_pair[0].y1))
+    length2 = calculate_distance((line_pair[1].x0, line_pair[1].y0), (line_pair[1].x1, line_pair[1].y1))
+    length_ratio = max(length1, length2) / min(length1, length2)
+    print(f'Ratio of lengths (longer/shorter): {length_ratio}')
+    print('Compared to square root of 3:', np.sqrt(3))
 
 filename = 'RawData\slopes3.txt'
 second_filename = 'RawData\slopes4.txt'
 #calculate_average_distance_with_error(filename)
-calculate_average_distance_with_error(second_filename)
+calculate_average_distance_with_error(second_filename) 
