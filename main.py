@@ -195,7 +195,7 @@ for line_pair in lines:
     length_ratios = []
     angles = []
 
-    for line_pair in lines:
+for line_pair in lines:
         length1 = calculate_distance((line_pair[0].x0, line_pair[0].y0), (line_pair[0].x1, line_pair[0].y1))
         length2 = calculate_distance((line_pair[1].x0, line_pair[1].y0), (line_pair[1].x1, line_pair[1].y1))
         length_ratio = max(length1, length2) / min(length1, length2)
@@ -206,16 +206,15 @@ for line_pair in lines:
         angle = np.arctan(abs((slope2 - slope1) / (1 + slope1 * slope2))) * (180 / np.pi)
         angles.append(angle)
 
-    average_length_ratio = np.mean(length_ratios)
-    length_ratio_error = np.std(length_ratios) / np.sqrt(len(length_ratios))
+average_length_ratio = np.mean(length_ratios)
+length_ratio_error = np.std(length_ratios) / np.sqrt(len(length_ratios))
+average_angle = np.mean(angles)
+angle_error = np.std(angles) / np.sqrt(len(angles))
 
-    average_angle = np.mean(angles)
-    angle_error = np.std(angles) / np.sqrt(len(angles))
-
-    print(f'Average ratio of lengths: {average_length_ratio}')
-    print(f'Error in average ratio of lengths: {length_ratio_error}')
-    print(f'Average angle: {average_angle} degrees')
-    print(f'Error in average angle: {angle_error} degrees')
+print(f'Average ratio of lengths: {average_length_ratio}')
+print(f'Error in average ratio of lengths: {length_ratio_error}')
+print(f'Average angle: {average_angle} degrees')
+print(f'Error in average angle: {angle_error} degrees')
 filename = 'RawData\slopes3.txt'
 second_filename = 'RawData\slopes4.txt'
 #calculate_average_distance_with_error(filename)
