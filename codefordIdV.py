@@ -24,7 +24,7 @@ def extract_csv_columns(file_path):
                 
     return first_column, second_column
 
-file_path = 'spectrum6.csv'  
+file_path = 'RawData\IV_Spectra\spectrum6.csv'  
 voltages, currents = extract_csv_columns(file_path)
 lnvolt = np.log(voltages)
 lncur = np.log(currents)
