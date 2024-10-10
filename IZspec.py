@@ -39,8 +39,20 @@ linear_fit = np.poly1d(linear_model)
 # Generate fitted log(I) values using the linear model
 log_I_fitted = linear_fit(log_Z_values)
 
+# Calculate the errors of the fitted parameters
+residuals = log_I_values - log_I_fitted
+ss_res = np.sum(residuals**2)
+ss_tot = np.sum((log_I_values - np.mean(log_I_values))**2)
+r_squared = 1 - (ss_res / ss_tot)
+p_cov = np.polyfit(log_Z_values, log_I_values, 1, cov=True)[1]
+errors = np.sqrt(np.diag(p_cov))
+
+print('R-squared:', r_squared)
+print('Slope:', linear_model[0], '±', errors[0])
+print('Intercept:', linear_model[1], '±', errors[1])
 # Plot the linear fit on top of the log-log data
 plt.plot(log_Z_values, log_I_fitted, '-', label='Linear fit: log(I) = {:.2f} * log(Z) + {:.2f}'.format(linear_model[0], linear_model[1]))
+
 # Plot the log-log data
 plt.plot(log_Z_values, log_I_values, 'o', label='log(I) vs log(Z)')
 plt.xlabel('log(Tip Distance) (log(m))')
@@ -48,6 +60,7 @@ plt.ylabel('log(Tunneling Current) (log(A))')
 plt.title('log(I) vs log(Z) Spectrum')
 plt.legend()
 plt.grid(True)
+plt.savefig('Produced_Plots\IZspec.png', dpi=300)
 plt.show()
 # Define the exponential model function
 def exponential_model(Z, a, b, c):
