@@ -96,3 +96,23 @@ plt.legend()
 plt.grid(True)
 plt.savefig('Produced_Plots/Log_Average_IZ_Line.png', dpi=300)
 plt.show()
+# Perform a linear fit to the log-log data
+slope, intercept = np.polyfit(log_average_Z_values, log_average_I_values, 1)
+
+# Generate fitted line data
+fitted_log_I_values = [slope * z + intercept for z in log_average_Z_values]
+
+# Plot the log-log average I-Z data with the fitted line
+plt.plot(log_average_Z_values, log_average_I_values, 'o', markersize=2, label='Log Average IZ Line')
+plt.plot(log_average_Z_values, fitted_log_I_values, 'r-', linewidth=2, alpha=0.7, label=f'Fitted Line: y={slope:.2f}x+{intercept:.2f}')
+plt.fill_between(log_average_Z_values, 
+                 [log_avg - log_std for log_avg, log_std in zip(log_average_I_values, log_std_I_values)], 
+                 [log_avg + log_std for log_avg, log_std in zip(log_average_I_values, log_std_I_values)], 
+                 color='grey', alpha=0.5, label='Log Std Dev Range')
+plt.xlabel('Log Distance (log(m))')
+plt.ylabel('Log Current (log(A))')
+plt.title('Log-Log Average I-Z Characteristics with Linear Fit')
+plt.legend()
+plt.grid(True)
+plt.savefig('Produced_Plots/Log_Average_IZ_Line_with_Fit.png', dpi=300)
+plt.show()
