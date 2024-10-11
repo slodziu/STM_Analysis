@@ -28,6 +28,30 @@ log_Z_vals = [np.log(x) for x in Z_values]
 log_I_values = [np.log(x) for x in I_values]
 
 print(len(Z_values))
+# Filter Z values greater than 5e-8
+mask = Z_values > 5e-8
+Z_values = Z_values[mask]
+I_values = I_values[mask]
+# Take the logarithm of both Z and I values
+log_Z_values = np.log(Z_values)
+log_I_values = np.log(I_values)
+# Fit a linear model to the log-log data
+linear_model = np.polyfit(log_Z_values, log_I_values, 1)
+linear_fit = np.poly1d(linear_model)
+
+# Generate fitted log(I) values using the linear model
+log_I_fitted = linear_fit(log_Z_values)
+
+# Plot the linear fit on top of the log-log data
+plt.plot(log_Z_values, log_I_fitted, '-', label='Linear fit: log(I) = {:.2f} * log(Z) + {:.2f}'.format(linear_model[0], linear_model[1]))
+# Plot the log-log data
+plt.plot(log_Z_values, log_I_values, 'o', label='log(I) vs log(Z)')
+plt.xlabel('log(Tip Distance) (log(m))')
+plt.ylabel('log(Tunneling Current) (log(A))')
+plt.title('log(I) vs log(Z) Spectrum')
+plt.legend()
+plt.grid(True)
+plt.show()
 # Define the exponential model function
 def exponential_model(Z, a, b, c):
     return a * np.exp(-b * Z) + c
