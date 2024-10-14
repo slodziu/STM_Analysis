@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
+#directory = 'RawData/IZ_Lines' #uncomment this line and comment the next line to run the code for IZ_Lines
+directory = 'RawData/IZ_Gold'
 
-directory = 'RawData/IZ_Lines'
 all_Z_values = []
 all_I_values = []
 for filename in os.listdir(directory):
