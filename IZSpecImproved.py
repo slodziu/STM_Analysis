@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
-#directory = 'RawData/IZ_Lines' #uncomment this line and comment the next line to run the code for IZ_Lines
 directory = 'RawData/IZ_Gold'
 
 all_Z_values = []
@@ -39,15 +38,33 @@ all_Z_values = translated_Z_values_per_array
  # Plot the data
 
 plt.figure(figsize=(10, 6))
+plot_count = 1
 for Z_values, I_values in zip(all_Z_values, all_I_values):
-    plt.plot(Z_values, I_values, 'o', markersize=2, label='IZ Line')
+    plt.plot(Z_values, I_values, 'o', markersize=2, label=f'n={plot_count}')
+    plot_count += 1
 plt.xlabel('Distance (m)')
 plt.ylabel('Current (A)')
-plt.title('I-Z Characteristics')
+plt.title(f'Raw I-Z Data from {plot_count} spectra')
 plt.legend()
 plt.grid(True)
-plt.savefig('Produced_Plots/IZ_Lines.png',dpi=300)
+plt.savefig('Produced_Plots/Gold/IZ_Lines.png',dpi=300)
 plt.show()
+
+# Filter out the values for Z > -8.645e-06
+filtered_Z_values = []
+filtered_I_values = []
+for Z_values, I_values in zip(all_Z_values, all_I_values):
+    filtered_Z = []
+    filtered_I = []
+    for z, i in zip(Z_values, I_values):
+        if z >= -8.645e-08:
+            filtered_Z.append(z)
+            filtered_I.append(i)
+    filtered_Z_values.append(filtered_Z)
+    filtered_I_values.append(filtered_I)
+
+all_Z_values = filtered_Z_values
+all_I_values = filtered_I_values
 
 # Calculate the average I values for each Z value
 average_I_values = [sum(i) / len(i) for i in zip(*all_I_values)]
