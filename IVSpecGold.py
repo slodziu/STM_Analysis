@@ -94,7 +94,7 @@ plt.show()
 
 # Define the sinx + x function
 def sinx_x(V, a, b, c):
-    return a * np.sin(b * V) + c*V
+    return a * np.cos(b * V) + c*V
 
 # Fit the average I-V data to the sinx * x function
 params, params_covariance = curve_fit(sinx_x, average_V, average_I)
