@@ -93,18 +93,18 @@ plt.savefig('Produced_Plots/Gold/IV_Gold_0.2-0.4.png',dpi=300)
 plt.show()
 
 # Define the sinx + x function
-def sinx_x(V, a, b, c):
-    return a * np.cos(b * V) + c*V
+def sinx_x(V, a, b, c, d):
+    return a * np.cos(b * V*5) + c*V +d
 
 # Fit the average I-V data to the sinx * x function
 params, params_covariance = curve_fit(sinx_x, average_V, average_I)
 
 # Extract the parameters
-a, b, c = params
-print(a, b, c)
+a, b, c, d = params
+print(a, b, c, d)
 
 # Generate fitted I values using the sinx * x model
-fitted_I_sinx_x = sinx_x(average_V, a, b, c)
+fitted_I_sinx_x = sinx_x(average_V, a, b, c, d)
 
 # Plot the fitted sinx * x function
 plt.figure(figsize=(10, 6))
