@@ -90,7 +90,7 @@ plt.ylabel('Current (A)')
 plt.title('Average I-Z Characteristics')
 plt.legend()
 plt.grid(True)
-plt.savefig('Produced_Plots/Average_IZ_Line.png',dpi=300)
+plt.savefig('Produced_Plots/Gold/Average_IZ_Line.png',dpi=300)
 plt.show()
 # Take the logarithm of the average Z and I values
 log_average_Z_values = np.log10(np.abs(average_Z_values))

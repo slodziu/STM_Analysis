@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 # Define the directory containing the CSV files
@@ -27,7 +28,7 @@ for filename in os.listdir(directory):
         all_I_values.append(I_values)
         # Convert lists to numpy arrays for easier manipulation
 all_V_values = np.array(all_V_values)
-all_I_values = np.array(all_I_values)
+all_I_values = np.array(all_I_values)*1e10
 # Shift I values such that data goes through (0,0)
 for i in range(len(all_I_values)):
     all_I_values[i] += all_I_values[i][0]
@@ -89,4 +90,31 @@ plt.grid(True)
 plt.xlim(0.2, 0.4)
 plt.ylim(-200, 200)
 plt.savefig('Produced_Plots/Gold/IV_Gold_0.2-0.4.png',dpi=300)
+plt.show()
+
+# Define the sinx + x function
+def sinx_x(V, a, b, c):
+    return a * np.sin(b * V) + c*V
+
+# Fit the average I-V data to the sinx * x function
+params, params_covariance = curve_fit(sinx_x, average_V, average_I)
+
+# Extract the parameters
+a, b, c = params
+print(a, b, c)
+
+# Generate fitted I values using the sinx * x model
+fitted_I_sinx_x = sinx_x(average_V, a, b, c)
+
+# Plot the fitted sinx * x function
+plt.figure(figsize=(10, 6))
+plt.plot(average_V, average_I, label='Average I-V Curve')
+plt.plot(average_V, fitted_I_sinx_x, label=f'Sinx + x Fit', color='r')
+plt.fill_between(average_V, average_I - std_I, average_I + std_I, color='b', alpha=0.2, label='Standard Deviation')
+plt.xlabel('Tip Voltage (V)')
+plt.ylabel('Tip Current (A)')
+plt.title('Average I-V Curve with Sinx + x Fit')
+plt.legend()
+plt.grid(True)
+plt.savefig('Produced_Plots/Gold/IV_Gold_Sinx_x_Fit.png', dpi=300)
 plt.show()
