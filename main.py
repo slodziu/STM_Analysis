@@ -176,7 +176,7 @@ def process_lines_in_folder(folder_path):
         return line_objects
 
     # Example usage
-folder_path = 'RawData/PerpLines'
+folder_path = 'RawData/linesgoldtip'
 lines = process_lines_in_folder(folder_path)
 for line_pair in lines:
     # Calculate the angle between the two lines
