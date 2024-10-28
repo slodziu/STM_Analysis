@@ -48,25 +48,30 @@ plt.legend()
 plt.grid(True)
 plt.savefig('Produced_Plots/Silicon/IV_Si_Average.png',dpi=300)
 plt.show()
+# Filter the average I and V to where average V > 0
+positive_indices = average_V > 0
+average_V = average_V[positive_indices]
+average_I = average_I[positive_indices]
+std_I = std_I[positive_indices]
+# Define a cubic function
+def cubic_function(V, a, b, c, d):
+    return a*V**3 + b*V**2 + c*V + d
 
-# Define the fitting function
-def fit_function(V, I_0, A, C):
-    return I_0 * (np.exp(A * V) - 1) + C
+# Fit the average I-V data to the cubic function
+params, covariance = curve_fit(cubic_function, average_V, average_I)
 
-# Perform the curve fitting
-popt, pcov = curve_fit(fit_function, average_V, average_I, p0=[1e-10, 1, 0])
+# Calculate the standard deviation errors on the parameters
+errors = np.sqrt(np.diag(covariance))
 
-# Extract the fitting parameters and their errors
-I_0_fit, A_fit, C_fit = popt
-errors = np.sqrt(np.diag(pcov))
+# Print the fit equation with parameters
+print(f"Fitted cubic equation: I = ({params[0]:.3e})*V^3 + ({params[1]:.3e})*V^2 + ({params[2]:.3e})*V + ({params[3]:.3e})")
+print(f"Parameter errors: {errors}")
 
-# Calculate the fitted curve
-fit = fit_function(average_V, I_0_fit, A_fit, C_fit)
-
-
-plt.plot(average_V, average_I, label=f'Averaged data from {file_count} spectra')  # 'bo' for blue points only
+# Generate the fitted curve
+fit = cubic_function(average_V, *params)
+plt.scatter(average_V, average_I, label=f'Averaged data from {file_count} spectra', s=10)  # 's=10' sets the size of the points
 plt.plot(average_V, fit, 'r-', label='Cubic Fit of the Data')  # 'r-' for red line
-plt.fill_between(average_V,fit - errors[0],fit + errors[0], color='r', alpha=0.2, label='Standard Deviation')
+plt.fill_between(average_V,fit - errors[0],fit + errors[0], color='r', alpha=0.8, label='Standard Deviation')
 plt.legend()
 plt.grid(True)
 plt.xlabel('Voltage (V)')
