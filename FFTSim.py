@@ -11,15 +11,15 @@ def generate_wave_vectors(k, theta, n_harmonics):
         wave_vectors.append((kx1, ky1, kx2, ky2))
     return wave_vectors
 
-def generate_coefficients(num_coefficients):
+def generate_coefficients(num_coefficients,order=2):
     P_n=[0.5]
     for i in range(num_coefficients):
-        P_n.append(2*10**(-i))
+        P_n.append(order*10**(-i))
     return P_n
 
-def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size):
+def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order):
     wave_vectors = generate_wave_vectors(k, theta, n_harmonics)
-    P_n = generate_coefficients(n_harmonics)
+    P_n = generate_coefficients(n_harmonics,order)
 
     # Generate real space lattice points
     x = np.linspace(-real_space_size/2, real_space_size/2, n)
@@ -85,7 +85,7 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size):
 a = 2*0.246  # lattice constant for graphene in nm
 k = 2 * np.pi / a  # wave vector
 n = 1000 # size of the simulation grid
-real_space_size = 2 # nm
+real_space_size = 25 # nm
 theta = np.pi / 3  
 n_harmonics = 10
-simulate_hopg_lattice(n_harmonics, k, theta, real_space_size)
+simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,2)
