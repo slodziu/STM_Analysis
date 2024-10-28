@@ -17,7 +17,7 @@ def generate_coefficients(num_coefficients,order=2):
         P_n.append(order*10**(-i))
     return P_n
 
-def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order):
+def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
     wave_vectors = generate_wave_vectors(k, theta, n_harmonics)
     P_n = generate_coefficients(n_harmonics,order)
 
@@ -32,8 +32,8 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order):
         P = P_n[i]
         # A-site contribution
         lattice_real_space += P * (np.cos(kx1 * X + ky1 * Y) + np.cos(kx2 * X + ky2 * Y))
-        # B-site contribution with a phase shift (e.g., pi)
-        lattice_real_space += P * (np.cos(kx1 * X + ky1 * Y + np.pi/3) + np.cos(kx2 * X + ky2 * Y + np.pi/3))
+        # B-site contribution 
+        lattice_real_space += P/10 * (np.cos(kx1 * X + ky1 * Y + np.pi/3) + np.cos(kx2 * X + ky2 * Y + np.pi/3))
 
     sigma = 10  # standard deviation for Gaussian smoothing
     gaussian_envelope = np.exp(-(X**2 + Y**2) / (2 * sigma**2))
@@ -84,8 +84,8 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order):
 # Constants for HOPG lattice
 a = 2*0.246  # lattice constant for graphene in nm
 k = 2 * np.pi / a  # wave vector
-n = 1000 # size of the simulation grid
-real_space_size = 25 # nm
+n_pts = 2000 # size of the simulation grid
+real_space_size = 5 # nm
 theta = np.pi / 3  
-n_harmonics = 10
-simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,2)
+n_harmonics = 15  # number of harmonics to include in the lattice
+simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,2,n_pts)
