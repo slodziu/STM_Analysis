@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
-directory = 'RawData/IZ_Gold'
+directory = 'RawData/IZ_Si'
 
 all_Z_values = []
 all_I_values = []
@@ -32,6 +32,12 @@ translated_Z_values_per_array = [
     [z - min_z for z in sublist] 
     for sublist, min_z in zip(all_Z_values, min_Z_values_per_array)
 ]
+# Translate each I array so that they all start at 0
+translated_I_values = [
+    [i - sublist[0] for i in sublist] 
+    for sublist in all_I_values
+]
+all_I_values = translated_I_values
 all_Z_values = translated_Z_values_per_array
 
 
@@ -63,17 +69,17 @@ for Z_values, I_values in zip(all_Z_values, all_I_values):
     filtered_Z_values.append(filtered_Z)
     filtered_I_values.append(filtered_I)
 
-all_Z_values = filtered_Z_values
-all_I_values = filtered_I_values
+#all_Z_values = filtered_Z_values
+#all_I_values = filtered_I_values
 
 # Calculate the average I values for each Z value
-average_I_values = [sum(i) / len(i) for i in zip(*all_I_values)]
+average_I_values = [sum(i) * 1e9/ len(i) for i in zip(*all_I_values)] 
 
 # Calculate the average Z values (assuming all Z arrays are the same)
-average_Z_values = [sum(z) / len(z) for z in zip(*all_Z_values)]
+average_Z_values = [sum(z) * 1e9 / len(z) for z in zip(*all_Z_values)] 
 
 # Calculate the standard deviation of I values for each Z value
-std_I_values = [np.std(i) for i in zip(*all_I_values)]
+std_I_values = [np.std(i)* 1e9 for i in zip(*all_I_values)]
 
 # Plot the average I-Z data with error bars
 
@@ -90,29 +96,37 @@ plt.ylabel('Current (A)')
 plt.title('Average I-Z Characteristics')
 plt.legend()
 plt.grid(True)
-plt.savefig('Produced_Plots/Gold/Average_IZ_Line.png',dpi=300)
+plt.savefig('Produced_Plots/Silicon/Average_IZ_Line.png',dpi=300)
 plt.show()
 # Take the logarithm of the average Z and I values
-log_average_Z_values = np.log10(np.abs(average_Z_values))
+log_average_Z_values = np.log10(average_Z_values)
 print(average_Z_values)
-log_average_I_values = np.log10(average_I_values)
+log_average_I_values = np.log10(np.abs(average_I_values))
+# Filter log Z values where log(Z) > 0 and shorten the I array accordingly
+filtered_log_Z_values = []
+filtered_log_I_values = []
+for log_Z, log_I in zip(log_average_Z_values, log_average_I_values):
+    if log_Z > 0:
+        filtered_log_Z_values.append(log_Z)
+        filtered_log_I_values.append(log_I)
 
+log_average_Z_values = filtered_log_Z_values
+log_average_I_values = filtered_log_I_values
 # Calculate the error in log scale
-log_std_I_values = [np.log10(avg + std) - np.log10(avg) for avg, std in zip(average_I_values, std_I_values)]
+log_std_I_values = [np.abs(np.log10(avg + std) - np.log10(avg)) for avg, std in zip(average_I_values, std_I_values)]
 
 # Plot the log-log average I-Z data with error bars
-print(log_average_Z_values)
 plt.plot(log_average_Z_values, log_average_I_values, 'r-', linewidth=2, label='Log Average IZ Line')
 plt.fill_between(log_average_Z_values, 
                  [log_avg - log_std for log_avg, log_std in zip(log_average_I_values, log_std_I_values)], 
                  [log_avg + log_std for log_avg, log_std in zip(log_average_I_values, log_std_I_values)], 
                  color='purple', alpha=0.5, label='Log Std Dev Range')
-plt.xlabel('Log Distance (log(m))')
-plt.ylabel('Log Current (log(A))')
+plt.xlabel(r'Log Distance ($\log(m)$)')
+plt.ylabel(r'Log Current ($\log(A)$)')
 plt.title('Log-Log Average I-Z Characteristics')
 plt.legend()
 plt.grid(True)
-plt.savefig('Produced_Plots/Gold/Log_Average_IZ_Line.png', dpi=300)
+plt.savefig('Produced_Plots/Silicon/Log_Average_IZ_Line.png', dpi=300)
 plt.show()
 # Perform a linear fit to the log-log data
 slope, intercept = np.polyfit(log_average_Z_values, log_average_I_values, 1)
@@ -132,5 +146,5 @@ plt.ylabel('Log Current (log(A))')
 plt.title('Log-Log Average I-Z Characteristics with Linear Fit')
 plt.legend()
 plt.grid(True)
-plt.savefig('Produced_Plots/Gold/Log_Average_IZ_Line_with_Fit.png', dpi=300)
+plt.savefig('Produced_Plots/Silicon/Log_Average_IZ_Line_with_Fit.png', dpi=300)
 plt.show()
