@@ -147,3 +147,7 @@ print(f"Maximum value of (dI/dV)/(I/V) + error in the range V > 0.8V: {max_plus_
 average_band_gap = np.mean(possible_V_vals)
 band_gap_error = np.std(possible_V_vals)
 print(f"Average band gap: {average_band_gap:.3e} ± {band_gap_error:.3e}V")
+real_band_gap = 1.12
+error = abs(real_band_gap - average_band_gap)
+sigma = error / band_gap_error
+print(f"The result is {sigma}sigma away.")
