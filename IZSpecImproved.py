@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import numpy as np
+from scipy.interpolate import interp1d
+from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 directory = 'RawData/IZ_Si'
@@ -83,7 +85,13 @@ std_I_values = [np.std(i)* 1e9 for i in zip(*all_I_values)]
 
 # Plot the average I-Z data with error bars
 
+# Shift all Z values so that they start at 0
+shifted_Z_values = [[z - min(average_Z_values) for z in average_Z_values]]
+shifted_I_values = [[i - min(average_I_values) for i in average_I_values]]
 
+# Update average_Z_values and average_I_values
+average_Z_values = shifted_Z_values[0]
+average_I_values = shifted_I_values[0]
 
 # Plot the average I-Z data
 plt.plot(average_Z_values, average_I_values, 'r-', linewidth=2, label='Average IZ Line')
@@ -114,6 +122,16 @@ log_average_Z_values = filtered_log_Z_values
 log_average_I_values = filtered_log_I_values
 # Calculate the error in log scale
 log_std_I_values = [np.abs(np.log10(avg + std) - np.log10(avg)) for avg, std in zip(average_I_values, std_I_values)]
+# Ensure log_average_Z_values and log_std_I_values are of the same length
+min_length = min(len(log_average_Z_values), len(log_std_I_values))
+log_average_Z_values = log_average_Z_values[:min_length]
+log_std_I_values = log_std_I_values[:min_length]
+
+# Interpolate the log_std_I_values to make it smooth
+interp_func = interp1d(log_average_Z_values, log_std_I_values, kind='linear', fill_value='extrapolate')
+
+# Generate smooth log_std_I_values
+log_std_I_values = interp_func(log_average_Z_values)
 
 # Plot the log-log average I-Z data with error bars
 plt.plot(log_average_Z_values, log_average_I_values, 'r-', linewidth=2, label='Log Average IZ Line')
@@ -147,4 +165,37 @@ plt.title('Log-Log Average I-Z Characteristics with Linear Fit')
 plt.legend()
 plt.grid(True)
 plt.savefig('Produced_Plots/Silicon/Log_Average_IZ_Line_with_Fit.png', dpi=300)
+plt.show() 
+
+log_average_Z_values = np.array(log_average_Z_values)
+log_average_I_values = np.array(log_average_I_values)
+
+
+valid_indices = np.where(log_average_Z_values >= 0.8)
+possible_Z_vals = []
+valid_Z = log_average_Z_values[valid_indices]
+valid_I = log_average_I_values[valid_indices]
+# Perform a linear fit to the valid log-log data
+valid_slope, valid_intercept = np.polyfit(valid_Z, valid_I, 1)
+
+# Generate fitted line data for the valid range
+valid_fitted_I = valid_slope * valid_Z + valid_intercept
+
+plt.plot(valid_Z,valid_I,'o',markersize = 2,label='Log Average IZ Line')
+plt.plot(valid_Z,valid_fitted_I,label='Fitted Line')
+plt.fill_between(valid_Z,valid_I-log_std_I_values[valid_indices],valid_I+log_std_I_values[valid_indices],color='purple',alpha=0.5,label='Log Std Dev Range')
+plt.xlabel('Log Distance (log(m))')
+plt.ylabel('Log Current (log(A))')
+plt.title('Log-Log Average I-Z Characteristics with Linear Fit')
+plt.legend()
+plt.grid(True)
+plt.savefig('Produced_Plots/Silicon/Log_Average_IZ_Line_with_Fit_Valid.png', dpi=300)
 plt.show()
+
+# Calculate the errors in the fit parameters
+
+slope, intercept, r_value, p_value, std_err = linregress(valid_Z, valid_I)
+
+# Print the fit line parameters with their errors
+print(f"Slope: {slope:.4f} ± {std_err:.4f}")
+print(f"Intercept: {intercept:.4f}")
