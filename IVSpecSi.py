@@ -28,7 +28,7 @@ for filename in os.listdir(directory):
         all_I_values.append(I_values)
         # Convert lists to numpy arrays for easier manipulation
 all_V_values = np.array(all_V_values)
-all_I_values = np.array(all_I_values)*1e10
+all_I_values = np.array(all_I_values)
 # Shift I values such that data goes through (0,0)
 for i in range(len(all_I_values)):
     all_I_values[i] += all_I_values[i][0]
@@ -49,7 +49,7 @@ plt.grid(True)
 plt.savefig('Produced_Plots/Silicon/IV_Si_Average.png',dpi=300)
 plt.show()
 # Filter the average I and V to where average V > 0
-positive_indices = average_V > 0
+positive_indices = (average_V > 0) 
 average_V = average_V[positive_indices]
 average_I = average_I[positive_indices]
 std_I = std_I[positive_indices]
@@ -62,16 +62,20 @@ params, covariance = curve_fit(cubic_function, average_V, average_I)
 
 # Calculate the standard deviation errors on the parameters
 errors = np.sqrt(np.diag(covariance))
-
+print('Errors:',errors)
 # Print the fit equation with parameters
 print(f"Fitted cubic equation: I = ({params[0]:.3e})*V^3 + ({params[1]:.3e})*V^2 + ({params[2]:.3e})*V + ({params[3]:.3e})")
 print(f"Parameter errors: {errors}")
+# Calculate the standard deviation on the fit for all values of V
+fit_std = np.sqrt(np.sum((np.array([average_V**3, average_V**2, average_V, np.ones_like(average_V)]) * errors[:, np.newaxis])**2, axis=0))
 
+# Print the standard deviation on the fit
+print('Standard deviation on the fit for all values of V:', fit_std)
 # Generate the fitted curve
 fit = cubic_function(average_V, *params)
 plt.scatter(average_V, average_I, label=f'Averaged data from {file_count} spectra', s=2)  # 's=10' sets the size of the points
 plt.plot(average_V, fit, 'r-', label='Cubic Fit of the Data')  # 'r-' for red line
-plt.fill_between(average_V,fit - errors[0],fit + errors[0], color='r', alpha=0.3, label='Standard Deviation')
+plt.fill_between(average_V,fit - fit_std,fit + fit_std, color='r', alpha=0.3, label='Standard Deviation of the Fit')
 plt.legend()
 plt.grid(True)
 plt.xlabel('Voltage (V)')
@@ -99,7 +103,7 @@ dIdV_over_IoverV_error = np.sqrt((dIdV_error / I_over_V)**2 + (dIdV * I_over_V_e
 
 # Plot (dI/dV)/(I/V) with error bars
 plt.plot(average_V, dIdV_over_IoverV, label='Derivative of fitted curve')  # 'ro' for red points only
-plt.fill_between(average_V, dIdV_over_IoverV - dIdV_over_IoverV_error, dIdV_over_IoverV + dIdV_over_IoverV_error, color='r', alpha=0.5, label='Error')
+plt.fill_between(average_V, dIdV_over_IoverV - dIdV_over_IoverV_error, dIdV_over_IoverV + dIdV_over_IoverV_error, color='r', alpha=0.5, label='Standard Deviation')
 plt.grid(True)
 plt.legend()
 plt.xlabel('Voltage (V)')
@@ -107,3 +111,39 @@ plt.ylabel('(dI/dV)/(I/V)')
 plt.title('(dI/dV)/(I/V) vs V')
 plt.savefig('Produced_Plots/Silicon/IV_Si_dIdV_over_IoverV.png', dpi=300)
 plt.show()
+
+# Find the indices where average_V > 0.8
+valid_indices = np.where(average_V > 0.8)
+possible_V_vals = []
+# Extract valid values
+valid_V = average_V[valid_indices]
+valid_dIdV_over_IoverV = dIdV_over_IoverV[valid_indices]
+valid_dIdV_over_IoverV_error = dIdV_over_IoverV_error[valid_indices]
+
+# Find the maximum value of dIdV_over_IoverV in the valid range and its index
+max_index = np.argmax(valid_dIdV_over_IoverV)
+max_value = valid_dIdV_over_IoverV[max_index]
+max_value_error = valid_dIdV_over_IoverV_error[max_index]
+max_value_voltage = valid_V[max_index]
+possible_V_vals.append(max_value_voltage)
+# Print the maximum value and its error
+print(f"Maximum value of (dI/dV)/(I/V) in the range V > 0.8V: {max_value:.3e} ± {max_value_error:.3e} at V = {max_value_voltage:.3e}V")
+
+# Find the maximum value of dIdV_over_IoverV - dIdV_over_IoverV_error in the valid range and its index
+max_minus_error_index = np.argmax(valid_dIdV_over_IoverV - valid_dIdV_over_IoverV_error)
+max_minus_error_value = valid_dIdV_over_IoverV[max_minus_error_index] - valid_dIdV_over_IoverV_error[max_minus_error_index]
+max_minus_error_voltage = valid_V[max_minus_error_index]
+possible_V_vals.append(max_minus_error_voltage)
+# Print the maximum value minus error
+print(f"Maximum value of (dI/dV)/(I/V) - error in the range V > 0.8V: {max_minus_error_value:.3e} at V = {max_minus_error_voltage:.3e}V")
+
+# Find the maximum value of dIdV_over_IoverV + dIdV_over_IoverV_error in the valid range and its index
+max_plus_error_index = np.argmax(valid_dIdV_over_IoverV + valid_dIdV_over_IoverV_error)
+max_plus_error_value = valid_dIdV_over_IoverV[max_plus_error_index] + valid_dIdV_over_IoverV_error[max_plus_error_index]
+max_plus_error_voltage = valid_V[max_plus_error_index]
+possible_V_vals.append(max_plus_error_voltage)
+# Print the maximum value plus error
+print(f"Maximum value of (dI/dV)/(I/V) + error in the range V > 0.8V: {max_plus_error_value:.3e} at V = {max_plus_error_voltage:.3e}V")
+average_band_gap = np.mean(possible_V_vals)
+band_gap_error = np.std(possible_V_vals)
+print(f"Average band gap: {average_band_gap:.3e} ± {band_gap_error:.3e}V")
