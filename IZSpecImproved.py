@@ -99,8 +99,8 @@ plt.fill_between(average_Z_values,
                  [avg - std for avg, std in zip(average_I_values, std_I_values)], 
                  [avg + std for avg, std in zip(average_I_values, std_I_values)], 
                  color='purple', alpha=0.5, label='Std Dev Range')
-plt.xlabel('Distance (m)')
-plt.ylabel('Current (A)')
+plt.xlabel('Distance (nm)')
+plt.ylabel('Current (nA)')
 plt.title('Average I-Z Characteristics')
 plt.legend()
 plt.grid(True)
