@@ -176,7 +176,7 @@ def process_lines_in_folder(folder_path):
         return line_objects
 
     # Example usage
-folder_path = 'RawData/PerpLines'
+folder_path = 'RawData/linesgoldtip'
 lines = process_lines_in_folder(folder_path)
 for line_pair in lines:
     # Calculate the angle between the two lines
@@ -190,7 +190,7 @@ for line_pair in lines:
     length2 = calculate_distance((line_pair[1].x0, line_pair[1].y0), (line_pair[1].x1, line_pair[1].y1))
     length_ratio = max(length1, length2) / min(length1, length2)
     print(f'Ratio of lengths (longer/shorter): {length_ratio}')
-    print('Compared to square root of 3:', np.sqrt(3))
+    print(f'Compared to square root of 3:', length_ratio/ np.sqrt(3)*100,'%')
     # Calculate the average of the ratio of the lengths with the error
     length_ratios = []
     angles = []
@@ -211,10 +211,8 @@ length_ratio_error = np.std(length_ratios) / np.sqrt(len(length_ratios))
 average_angle = np.mean(angles)
 angle_error = np.std(angles) / np.sqrt(len(angles))
 
-print(f'Average ratio of lengths: {average_length_ratio}')
-print(f'Error in average ratio of lengths: {length_ratio_error}')
-print(f'Average angle: {average_angle} degrees')
-print(f'Error in average angle: {angle_error} degrees')
+print(f'Average ratio of lengths: {average_length_ratio} ± {length_ratio_error}')
+print(f'Average angle: {average_angle} ± {angle_error} degrees')
 filename = 'RawData\slopes3.txt'
 second_filename = 'RawData\slopes4.txt'
 #calculate_average_distance_with_error(filename)
