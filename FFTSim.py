@@ -32,8 +32,8 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
         P = P_n[i]
         # A-site contribution
         lattice_real_space += P * (np.cos(kx1 * X + ky1 * Y) + np.cos(kx2 * X + ky2 * Y))
-        # B-site contribution 
-        lattice_real_space += P/10 * (np.cos(kx1 * X + ky1 * Y + np.pi/3) + np.cos(kx2 * X + ky2 * Y + np.pi/3))
+        # B-site contribution with a phase shift
+        lattice_real_space += P * (np.cos(kx1 * X + ky1 * Y + np.pi/2) + np.cos(kx2 * X + ky2 * Y + np.pi/2))
 
     sigma = 10  # standard deviation for Gaussian smoothing
     gaussian_envelope = np.exp(-(X**2 + Y**2) / (2 * sigma**2))
@@ -66,26 +66,28 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
     # Compute 2D FFT for reciprocal space
     lattice_reciprocal_space = np.fft.fftshift(np.fft.fft2(lattice_real_space_smooth))
     magnitude_reciprocal = np.abs(lattice_reciprocal_space)
-
     # Plot reciprocal space (2D FFT result)
     plt.title("Reciprocal Space (2D FFT of HOPG Lattice)")
     plt.imshow(np.log(1 + magnitude_reciprocal), cmap='plasma')  # 1 + data for contrast
     kx = np.fft.fftshift(np.fft.fftfreq(n, d=(x[1] - x[0])))
     ky = np.fft.fftshift(np.fft.fftfreq(n, d=(y[1] - y[0])))
-    plt.xticks(ticks=np.linspace(0, n, 5), labels=np.round(np.linspace(kx[0], kx[-1], 5), 2))
-    plt.yticks(ticks=np.linspace(0, n, 5), labels=np.round(np.linspace(ky[0], ky[-1], 5), 2))
-    plt.xlabel("kx (1/nm)")
-    plt.ylabel("ky (1/nm)")
+
+    plt.xlabel(r"$k_x$ (1/nm)")
+    plt.ylabel(r"$k_y$ (1/nm)")
+    plt.xlim(n//2-50,n//2+50)
+    plt.ylim(n//2-50,n//2+50)
+    plt.xticks(ticks=np.linspace(n//2-50, n//2+50, 5), labels=np.round(np.linspace(kx[n//2-50], kx[n//2+50], 5), 1))
+    plt.yticks(ticks=np.linspace(n//2-50, n//2+50, 5), labels=np.round(np.linspace(ky[n//2-50], ky[n//2+50], 5), 1))
     plt.colorbar(label='Intensity (AU)')
     plt.savefig(f"Produced_Plots/FFTSIM/HOPG_Lattice_Reciprocal_Space_{real_space_size}nm.png", dpi=300)
     plt.show()
 
 
 # Constants for HOPG lattice
-a = 2*0.246  # lattice constant for graphene in nm
-k = 2 * np.pi / a  # wave vector
-n_pts = 2000 # size of the simulation grid
-real_space_size = 5 # nm
+a = 0.246  # lattice constant for graphene in nm
+k = 4 * np.pi / (a*np.sqrt(3))  # wave vector
+n_pts = 1000 # size of the simulation grid
+real_space_size = 2 # nm
 theta = np.pi / 3  
-n_harmonics = 15  # number of harmonics to include in the lattice
-simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,2,n_pts)
+n_harmonics = 20  # number of harmonics to include in the lattice
+simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,5,n_pts)
