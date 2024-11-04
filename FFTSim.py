@@ -85,9 +85,9 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
 
 # Constants for HOPG lattice
 a = 0.246  # lattice constant for graphene in nm
-k = 4 * np.pi / (a*np.sqrt(3))  # wave vector
-n_pts = 1000 # size of the simulation grid
-real_space_size = 2 # nm
+k = 2 * np.pi / a  # wave vector
+n_pts = 2000 # size of the simulation grid
+real_space_size = 3 # nm
 theta = np.pi / 3  
 n_harmonics = 20  # number of harmonics to include in the lattice
 simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,5,n_pts)

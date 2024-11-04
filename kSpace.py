@@ -33,9 +33,12 @@ mean_value = np.mean(fourth_column_values)
 standard_error = np.std(fourth_column_values) / np.sqrt(len(fourth_column_values))
 # Print the results in scientific notation
 
-a = 0.2461e-9
+a = 0.2461e-9 #lattice parameter in meters
 #k = 4 * np.pi / (a*np.sqrt(3))
-k = 2*np.pi/a
-print(f'Desired value: {k:.2e}')
+k = 2*np.pi/a 
+print(f'Desired value: {k/2:.2e}')
 print(f"Mean: {mean_value:.2e}")
 print(f"Standard Error: {standard_error:.2e}")
+diff = abs(mean_value - k/2)
+sigma = diff/standard_error
+print(f"This many sigma away: {sigma}")
