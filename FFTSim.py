@@ -69,18 +69,19 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
     lattice_reciprocal_space = np.fft.fftshift(np.fft.fft2(lattice_real_space_smooth))
     magnitude_reciprocal = np.abs(lattice_reciprocal_space)
     # Plot reciprocal space (2D FFT result)
-    plt.title("Reciprocal Space (2D FFT of HOPG Lattice)")
+    plt.title("k-space of Simulated HOPG Lattice (2D FFT)")
     plt.imshow(np.log(1 + magnitude_reciprocal), cmap='plasma')  # 1 + data for contrast
     kx = np.fft.fftshift(np.fft.fftfreq(n, d=(x[1] - x[0])))
     ky = np.fft.fftshift(np.fft.fftfreq(n, d=(y[1] - y[0])))
 
     plt.xlabel(r"$k_x$ (1/nm)")
     plt.ylabel(r"$k_y$ (1/nm)")
-    plt.xlim(n//2-100,n//2+100)
-    plt.ylim(n//2-100,n//2+100)
-    plt.xticks(ticks=np.linspace(n//2-100, n//2+100, 5), labels=np.round(np.linspace(kx[n//2-100], kx[n//2+100], 5), 1))
-    plt.yticks(ticks=np.linspace(n//2-100, n//2+100, 5), labels=np.round(np.linspace(ky[n//2-100], ky[n//2+100], 5), 1))
-    plt.colorbar(label='Intensity (AU)')
+    scale_length = 60
+    plt.xlim(n//2-scale_length,n//2+scale_length)
+    plt.ylim(n//2-scale_length,n//2+scale_length)
+    plt.xticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(kx[n//2-scale_length], kx[n//2+scale_length], 5), 1))
+    plt.yticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(ky[n//2-scale_length], ky[n//2+scale_length], 5), 1))
+    plt.colorbar(label=r'\log{Intensity} (AU)')
     plt.savefig(f"Produced_Plots/FFTSIM/HOPG_Lattice_Reciprocal_Space_{real_space_size}nm.png", dpi=300)
     plt.show()
 
