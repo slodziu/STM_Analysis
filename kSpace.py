@@ -24,25 +24,27 @@ for filename in os.listdir(directory_path):
 
 print(fourth_column_values)
 # Convert the list of strings to a list of floats
-fourth_column_values = [float(value) for value in fourth_column_values]
+fourth_column_values = [float(value)*2*np.pi for value in fourth_column_values]
 
 # Calculate the mean
 mean_value = np.mean(fourth_column_values)
 
 # Calculate the standard error of the mean
-standard_error = np.std(fourth_column_values) / np.sqrt(len(fourth_column_values))
+standard_error = np.std(fourth_column_values) / np.sqrt(len(fourth_column_values)-1)
 # Print the results in scientific notation
 
 a = 0.2461e-9 #lattice parameter in meters
 k = 4 * np.pi / (a*np.sqrt(3))
+k_pixel = 64.4e9*2*np.pi/128
 #k = 2*np.pi/a 
 print(f'Desired value: {k:.2e}')
 print(f"Mean: {mean_value:.2e}")
 print(f"Standard Error: {standard_error:.2e}")
 diff = abs(mean_value - k/2)
-sigma = diff/standard_error
+sigma = diff/k_pixel
 print(f"This many sigma away: {sigma}")
 
+print(f"Pixel size in k-space: {k_pixel:.2e} 1/m")
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
@@ -67,3 +69,28 @@ plt.savefig(output_path)
 
 # Show the plot (optional)
 plt.show()
+
+# Load the new image
+image_path_fixed = os.path.join('RawData', 'fixed-real.png')
+image_fixed = mpimg.imread(image_path_fixed)
+
+# Create a new figure and axis
+fig_fixed, ax_fixed = plt.subplots()
+
+# Display the new image
+ax_fixed.imshow(image_fixed, extent=[-1, 1, -1, 1])
+
+# Set the x and y axis labels
+ax_fixed.set_xlabel('X (nm)')
+ax_fixed.set_ylabel('Y (nm)')
+# Set the plot title
+ax_fixed.set_title('Experimental HOPG Data')
+
+# Remove excess white space
+plt.tight_layout()
+
+# Save the figure with axes to the Produced_Plots directory
+output_path_fixed = os.path.join('Produced_Plots', 'fixed-real_with_axes.png')
+plt.savefig(output_path_fixed, dpi=300)
+
+# Show the plot (optional)

@@ -115,7 +115,7 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
     plt.ylim(n//2-scale_length, n//2+scale_length)
     plt.xticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(kx[n//2-scale_length], kx[n//2+scale_length], 5), 1))
     plt.yticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(ky[n//2-scale_length], ky[n//2+scale_length], 5), 1))
-    plt.colorbar(label=r'$\log{(Intensity()}$ (AU)')
+    plt.colorbar(label=r'$\log{(Intensity)}$ (AU)')
 
     for i, (y, x) in enumerate(filtered_spot_coords):
         plt.scatter(x, y, edgecolor='red', facecolor='none', s=100)
@@ -136,10 +136,11 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
                     closest_j = j
         if closest_j is not None:
             plt.plot([filtered_spot_coords[i][1], filtered_spot_coords[closest_j][1]], [filtered_spot_coords[i][0], filtered_spot_coords[closest_j][0]], 'r-')
-    plt.plot([filtered_spot_coords[3][1], filtered_spot_coords[5][1]], [filtered_spot_coords[3][0], filtered_spot_coords[5][0]], 'r-')
-    plt.plot([filtered_spot_coords[2][1], filtered_spot_coords[4][1]], [filtered_spot_coords[2][0], filtered_spot_coords[4][0]], 'r-')
+    plt.plot([filtered_spot_coords[0][1], filtered_spot_coords[3][1]], [filtered_spot_coords[0][0], filtered_spot_coords[3][0]], 'r-')
+    plt.plot([filtered_spot_coords[1][1], filtered_spot_coords[2][1]], [filtered_spot_coords[1][0], filtered_spot_coords[2][0]], 'r-')
     for i, (y, x) in enumerate(filtered_spot_coords):
-        print(f"Spot {i+1}: (kx, ky) = ({kx[x]:.2f}, {ky[y]:.2f})")
+        distance_from_origin = np.sqrt((kx[x] - kx[n//2])**2 + (ky[y] - ky[n//2])**2)
+        print(f"Spot {i+1}: (kx, ky) = ({kx[x]:.2f}, {ky[y]:.2f}), Distance from origin = {distance_from_origin:.2f} 1/nm")
     # Draw arrows from the center to each of the spots
     center_x, center_y = n // 2, n // 2
     for i, (y, x) in enumerate(filtered_spot_coords):
@@ -147,15 +148,18 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
         dy = y - center_y
         arrow_length = np.sqrt(dx**2 + dy**2) - 7  # shorten the arrow by 5 units
         plt.arrow(center_x, center_y, dx * (arrow_length / np.sqrt(dx**2 + dy**2)), dy * (arrow_length / np.sqrt(dx**2 + dy**2)), color='yellow', head_width=3, head_length=3)
+    # Add labels to the arrows corresponding to points 1 and 4
+    plt.text(filtered_spot_coords[5][1]-10, filtered_spot_coords[5][0] + 2, r'$\vec{g_1}$', color='yellow', fontsize=12, ha='center')
+    plt.text(filtered_spot_coords[3][1]-10, filtered_spot_coords[3][0] - 10, r'$\vec{g_2}$', color='yellow', fontsize=12, ha='center')
     plt.savefig(f"Produced_Plots/FFTSIM/HOPG_Lattice_Reciprocal_Space_Highlighted_{real_space_size}nm.png", dpi=300)
     plt.show()
 
 
 # Constants for HOPG lattice
 a = 0.246  # lattice constant for graphene in nm
-k = 2 * np.pi / a  # wave vector
-n_pts = 3000 # size of the simulation grid
-real_space_size = 3.5 # nm
+k = 4 * np.pi / (a*np.sqrt(3))  # wave vector
+n_pts = 1000 # size of the simulation grid
+real_space_size = 3# nm
 theta = np.pi / 3  
 n_harmonics = 10  # number of harmonics to include in the lattice
 simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,10,n_pts)
