@@ -34,11 +34,36 @@ standard_error = np.std(fourth_column_values) / np.sqrt(len(fourth_column_values
 # Print the results in scientific notation
 
 a = 0.2461e-9 #lattice parameter in meters
-#k = 4 * np.pi / (a*np.sqrt(3))
-k = 2*np.pi/a 
-print(f'Desired value: {k/2:.2e}')
+k = 4 * np.pi / (a*np.sqrt(3))
+#k = 2*np.pi/a 
+print(f'Desired value: {k:.2e}')
 print(f"Mean: {mean_value:.2e}")
 print(f"Standard Error: {standard_error:.2e}")
 diff = abs(mean_value - k/2)
 sigma = diff/standard_error
 print(f"This many sigma away: {sigma}")
+
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+# Load the image
+image_path = os.path.join('RawData', 'k-vec.png')
+image = mpimg.imread(image_path)
+
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Display the image
+ax.imshow(image)
+
+# Set the x and y axis labels
+ax.set_xlabel('X-axis label')
+ax.set_ylabel('Y-axis label')
+
+# Save the figure with axes to the Produced_Plots directory
+output_path = os.path.join('Produced_Plots', 'k-vec_with_axes.png')
+os.makedirs('Produced_Plots', exist_ok=True)
+plt.savefig(output_path)
+
+# Show the plot (optional)
+plt.show()

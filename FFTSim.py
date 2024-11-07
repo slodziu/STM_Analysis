@@ -71,8 +71,9 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
     # Plot reciprocal space (2D FFT result)
     plt.title("k-space of Simulated HOPG Lattice (2D FFT)")
     plt.imshow(np.log(1 + magnitude_reciprocal), cmap='plasma')  # 1 + data for contrast
-    kx = np.fft.fftshift(np.fft.fftfreq(n, d=(x[1] - x[0])))
-    ky = np.fft.fftshift(np.fft.fftfreq(n, d=(y[1] - y[0])))
+    dx = real_space_size / n_pts
+    kx = np.fft.fftshift(np.fft.fftfreq(n, d=dx)) * ( np.pi)
+    ky = np.fft.fftshift(np.fft.fftfreq(n, d=dx))* (np.pi)
 
     plt.xlabel(r"$k_x$ (1/nm)")
     plt.ylabel(r"$k_y$ (1/nm)")
@@ -81,8 +82,72 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
     plt.ylim(n//2-scale_length,n//2+scale_length)
     plt.xticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(kx[n//2-scale_length], kx[n//2+scale_length], 5), 1))
     plt.yticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(ky[n//2-scale_length], ky[n//2+scale_length], 5), 1))
-    plt.colorbar(label=r'\log{Intensity} (AU)')
+    plt.colorbar(label=r'$\log{(Intensity)}$ (AU)')
     plt.savefig(f"Produced_Plots/FFTSIM/HOPG_Lattice_Reciprocal_Space_{real_space_size}nm.png", dpi=300)
+    plt.show()
+    # Highlight and number spots of highest intensity in reciprocal space
+    num_spots = 6  # Number of spots to highlight
+    indices = np.unravel_index(np.argsort(magnitude_reciprocal.ravel())[::-1], magnitude_reciprocal.shape)
+    spot_coords = list(zip(indices[0], indices[1]))
+
+    # Filter out spots that are within a 5px radius of each other and closest to the origin
+    filtered_spot_coords = []
+    for y, x in spot_coords:
+        if all(np.sqrt((y - fy)**2 + (x - fx)**2) > 5 for fy, fx in filtered_spot_coords):
+            filtered_spot_coords.append((y, x))
+        if len(filtered_spot_coords) >= num_spots:
+            break
+
+    # Sort the filtered spots by their distance to the origin
+    filtered_spot_coords.sort(key=lambda coord: np.sqrt((coord[0] - n//2)**2 + (coord[1] - n//2)**2))
+
+    # Calculate the pixel size in k-space
+    kx_pixel_size = kx[1] - kx[0]
+    ky_pixel_size = ky[1] - ky[0]
+    print(f"One pixel represents {kx_pixel_size:.5f} 1/nm in k_x direction")
+    print(f"One pixel represents {ky_pixel_size:.5f} 1/nm in k_y direction")
+
+    plt.title("k-space of HOPG with Lattice Vectors")
+    plt.imshow(np.log(1 + magnitude_reciprocal), cmap='plasma')
+    plt.xlabel(r"$k_x$ (1/nm)")
+    plt.ylabel(r"$k_y$ (1/nm)")
+    plt.xlim(n//2-scale_length, n//2+scale_length)
+    plt.ylim(n//2-scale_length, n//2+scale_length)
+    plt.xticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(kx[n//2-scale_length], kx[n//2+scale_length], 5), 1))
+    plt.yticks(ticks=np.linspace(n//2-scale_length, n//2+scale_length, 5), labels=np.round(np.linspace(ky[n//2-scale_length], ky[n//2+scale_length], 5), 1))
+    plt.colorbar(label=r'$\log{(Intensity()}$ (AU)')
+
+    for i, (y, x) in enumerate(filtered_spot_coords):
+        plt.scatter(x, y, edgecolor='red', facecolor='none', s=100)
+        plt.text(x, y + 5, str(i+1), color='white', fontsize=8, ha='center', va='center')  # Adjusted y position for label
+
+
+    # Sort the filtered spots by their distance to the origin
+    filtered_spot_coords.sort(key=lambda coord: np.sqrt((coord[0] - n//2)**2 + (coord[1] - n//2)**2))
+
+    for i in range(len(filtered_spot_coords)):
+        min_dist = float('inf')
+        closest_j = None
+        for j in range(len(filtered_spot_coords)):
+            if i != j:
+                dist = np.sqrt((filtered_spot_coords[i][0] - filtered_spot_coords[j][0])**2 + (filtered_spot_coords[i][1] - filtered_spot_coords[j][1])**2)
+                if dist < min_dist:
+                    min_dist = dist
+                    closest_j = j
+        if closest_j is not None:
+            plt.plot([filtered_spot_coords[i][1], filtered_spot_coords[closest_j][1]], [filtered_spot_coords[i][0], filtered_spot_coords[closest_j][0]], 'r-')
+    plt.plot([filtered_spot_coords[3][1], filtered_spot_coords[5][1]], [filtered_spot_coords[3][0], filtered_spot_coords[5][0]], 'r-')
+    plt.plot([filtered_spot_coords[2][1], filtered_spot_coords[4][1]], [filtered_spot_coords[2][0], filtered_spot_coords[4][0]], 'r-')
+    for i, (y, x) in enumerate(filtered_spot_coords):
+        print(f"Spot {i+1}: (kx, ky) = ({kx[x]:.2f}, {ky[y]:.2f})")
+    # Draw arrows from the center to each of the spots
+    center_x, center_y = n // 2, n // 2
+    for i, (y, x) in enumerate(filtered_spot_coords):
+        dx = x - center_x
+        dy = y - center_y
+        arrow_length = np.sqrt(dx**2 + dy**2) - 7  # shorten the arrow by 5 units
+        plt.arrow(center_x, center_y, dx * (arrow_length / np.sqrt(dx**2 + dy**2)), dy * (arrow_length / np.sqrt(dx**2 + dy**2)), color='yellow', head_width=3, head_length=3)
+    plt.savefig(f"Produced_Plots/FFTSIM/HOPG_Lattice_Reciprocal_Space_Highlighted_{real_space_size}nm.png", dpi=300)
     plt.show()
 
 
@@ -90,7 +155,7 @@ def simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,order,n):
 a = 0.246  # lattice constant for graphene in nm
 k = 2 * np.pi / a  # wave vector
 n_pts = 3000 # size of the simulation grid
-real_space_size = 3 # nm
+real_space_size = 3.5 # nm
 theta = np.pi / 3  
 n_harmonics = 10  # number of harmonics to include in the lattice
 simulate_hopg_lattice(n_harmonics, k, theta, real_space_size,10,n_pts)
